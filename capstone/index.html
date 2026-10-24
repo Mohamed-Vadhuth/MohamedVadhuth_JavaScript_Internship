@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive Product Inventory & Analytics Dashboard - JavaScript Internship Capstone Mini Project.">
+    <title>Product Inventory & Analytics Dashboard</title>
+    <!-- Google Fonts for Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-area">
+                    <div class="logo-badge">⚡ JS Capstone</div>
+                    <h1>Interactive Product Inventory & Analytics Dashboard</h1>
+                </div>
+                <p class="subtitle">A full-featured JavaScript mini-project combining variables, operators, conditionals, loops, functions, and array methods.</p>
+            </div>
+            <div class="header-actions">
+                <button id="btn-quick-monitor" class="btn btn-secondary" title="Add Monitor at $150 to verify assignment requirements">
+                    <span>⚡ Quick Test: Add Monitor ($150)</span>
+                </button>
+                <button id="btn-reset-inventory" class="btn btn-outline" title="Reset to base inventory (Laptop $800, Mouse $25)">
+                    <span>↺ Reset Initial Data</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Notification Toast Bar -->
+        <div id="toast-message" class="toast-message hidden" role="alert" aria-live="polite"></div>
+
+        <!-- Metrics Overview Cards -->
+        <section class="metrics-grid" aria-label="Inventory Overview">
+            <div class="card metric-card">
+                <div class="metric-icon">📦</div>
+                <div class="metric-details">
+                    <span class="metric-label">Total Inventory Items</span>
+                    <h2 class="metric-value" id="metric-total-items">0</h2>
+                </div>
+            </div>
+            <div class="card metric-card">
+                <div class="metric-icon">💰</div>
+                <div class="metric-details">
+                    <span class="metric-label">Total Inventory Value</span>
+                    <h2 class="metric-value highlight" id="metric-total-value">$0.00</h2>
+                </div>
+            </div>
+            <div class="card metric-card">
+                <div class="metric-icon">🏷️</div>
+                <div class="metric-details">
+                    <span class="metric-label">Affordable Items (&lt; $200)</span>
+                    <h2 class="metric-value" id="metric-affordable-count">0</h2>
+                </div>
+            </div>
+            <div class="card metric-card">
+                <div class="metric-icon">🧾</div>
+                <div class="metric-details">
+                    <span class="metric-label">Total with Tax (10%)</span>
+                    <h2 class="metric-value" id="metric-total-with-tax">$0.00</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace (Grid of Form and Tables) -->
+        <main class="main-layout">
+            <!-- Left Column: Add Product & Configuration -->
+            <aside class="sidebar-column">
+                <!-- Add Product Form Card -->
+                <div class="card form-card">
+                    <div class="card-header">
+                        <h3>Add New Product</h3>
+                        <span class="badge-subtle">Inputs & Validation</span>
+                    </div>
+                    <form id="product-form" novalidate>
+                        <div class="form-group">
+                            <label for="product-name">Product Name</label>
+                            <input 
+                                type="text" 
+                                id="product-name" 
+                                name="productName" 
+                                placeholder="e.g., Monitor, Mechanical Keyboard" 
+                                required 
+                                autocomplete="off"
+                            >
+                            <small class="field-error" id="name-error"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">Price ($ USD)</label>
+                            <input 
+                                type="number" 
+                                id="product-price" 
+                                name="productPrice" 
+                                placeholder="e.g., 150" 
+                                step="any" 
+                                required
+                            >
+                            <small class="field-error" id="price-error"></small>
+                        </div>
+                        <button type="submit" id="btn-add-product" class="btn btn-primary full-width">
+                            ➕ Add Product to Inventory
+                        </button>
+                    </form>
+                    <div class="helper-note">
+                        <strong>Category Thresholds (via Switch):</strong>
+                        <ul>
+                            <li><span class="pill pill-budget">Budget</span>: &le; $50</li>
+                            <li><span class="pill pill-standard">Standard</span>: &gt; $50 to $200</li>
+                            <li><span class="pill pill-premium">Premium</span>: &gt; $200</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Financial Simulator (Tax & Discount Functions) -->
+                <div class="card finance-card">
+                    <div class="card-header">
+                        <h3>Financial Calculations</h3>
+                        <span class="badge-subtle">Functions & Scope</span>
+                    </div>
+                    <div class="finance-form">
+                        <div class="form-group-inline">
+                            <label for="tax-rate-input">Sales Tax Rate (%):</label>
+                            <input type="number" id="tax-rate-input" value="10" min="0" max="100" step="1">
+                        </div>
+                        <div class="form-group-inline">
+                            <label for="discount-rate-input">Promo Discount (%):</label>
+                            <input type="number" id="discount-rate-input" value="0" min="0" max="100" step="1">
+                        </div>
+                        <div class="calc-breakdown">
+                            <div class="calc-row">
+                                <span>Subtotal Value:</span>
+                                <strong id="calc-subtotal">$0.00</strong>
+                            </div>
+                            <div class="calc-row">
+                                <span>Discount Applied:</span>
+                                <span id="calc-discount" class="text-danger">-$0.00</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Estimated Tax:</span>
+                                <span id="calc-tax" class="text-info">+$0.00</span>
+                            </div>
+                            <div class="calc-row total-row">
+                                <span>Effective Total:</span>
+                                <strong id="calc-final-total">$0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Column: Inventory Table, Analytics & Reports -->
+            <section class="content-column">
+                <!-- Product Table Card -->
+                <div class="card table-card">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3>Inventory Roster</h3>
+                            <p class="section-desc">Iterated using <code>forEach()</code> with category badges</p>
+                        </div>
+                        <div class="filter-controls">
+                            <label for="filter-select">Display Filter:</label>
+                            <select id="filter-select" class="custom-select">
+                                <option value="all">Show All Products</option>
+                                <option value="affordable">Affordable (&lt; $200 only)</option>
+                                <option value="budget">Budget (&le; $50)</option>
+                                <option value="standard">Standard ($50.01 - $200)</option>
+                                <option value="premium">Premium (&gt; $200)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="inventory-table" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product Name</th>
+                                    <th>Unit Price</th>
+                                    <th>Category Badge</th>
+                                    <th>Affordability (&lt; $200)</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table-body">
+                                <!-- Populated dynamically by script.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Analytics & Generated Reports Grid -->
+                <div class="analytics-grid">
+                    <!-- Filtered Affordable Products Box -->
+                    <div class="card analytics-card">
+                        <div class="card-header">
+                            <h4>Affordable Products Filter</h4>
+                            <span class="badge-subtle"><code>filter()</code> Array Method</span>
+                        </div>
+                        <p class="card-explainer">Items matching condition <code>price &lt; 200</code>:</p>
+                        <div id="affordable-items-list" class="chip-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="raw-output">
+                            <small>Raw Array Output:</small>
+                            <code id="affordable-items-raw">[]</code>
+                        </div>
+                    </div>
+
+                    <!-- Mapped Report List Box -->
+                    <div class="card analytics-card">
+                        <div class="card-header">
+                            <h4>Formatted Report Tags</h4>
+                            <span class="badge-subtle"><code>map()</code> Array Method</span>
+                        </div>
+                        <p class="card-explainer">Transformed to <code>["NAME: $PRICE", ...]</code>:</p>
+                        <div class="raw-output map-output">
+                            <code id="mapped-report-list">[]</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Simulation Console -->
+                <div class="card console-card">
+                    <div class="card-header flex-between">
+                        <div class="console-title">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                            <span class="console-title-text">Assignment Specification Output Terminal (Console Output Simulation)</span>
+                        </div>
+                        <button id="btn-copy-console" class="btn btn-tiny" title="Copy simulated log">Copy Output</button>
+                    </div>
+                    <pre id="console-stream" class="console-stream"></pre>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>JavaScript Curriculum Capstone Mini Project &bull; Built with HTML5, CSS3, and Vanilla JavaScript (ES6+)</p>
+            <p class="footer-meta">Compatible with modern web browsers and Node.js execution environments.</p>
+        </footer>
+    </div>
+
+    <!-- Application Script -->
+    <script src="script.js"></script>
+</body>
+</html>
